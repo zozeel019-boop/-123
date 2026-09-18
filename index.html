@@ -3,7 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#071b1d" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="القرآن الكريم" />
     <title>القرآن الكريم</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="quran-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="quran-icon.svg" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -143,12 +151,17 @@
             <div class="recitation-box">
               <div class="audio-meta">
                 <strong id="recitationSurah">الفاتحة</strong>
-                <span id="recitationVerse">الآية 1</span>
+                <span id="recitationVerse">السورة كاملة</span>
               </div>
+              <div class="reciter-name">القارئ: الشيخ محمد صديق المنشاوي</div>
               <div class="player-controls">
-                <button id="playRecitationBtn" class="primary-btn" type="button">تشغيل</button>
+                <button id="playRecitationBtn" class="primary-btn" type="button">تشغيل السورة كاملة</button>
                 <button id="pauseRecitationBtn" class="secondary-btn" type="button">إيقاف</button>
               </div>
+              <audio id="quranAudio" class="quran-audio" controls preload="auto">
+                متصفحك لا يدعم تشغيل الصوت.
+              </audio>
+              <small id="audioStatus" class="audio-status" role="status">تلاوة السورة كاملة — اضغط تشغيل</small>
               <p id="recitationText" class="recitation-text">بِسْمِ ٱللّٰهِ ٱلرَّحْمٰنِ ٱلرَّحِيمِ</p>
             </div>
           </div>
@@ -238,5 +251,12 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js').catch((error) => {
+          console.error('Unable to register the app service worker:', error);
+        });
+      }
+    </script>
   </body>
 </html>

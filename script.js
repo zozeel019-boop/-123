@@ -2,6 +2,8 @@ const surahNames = [
   'الفاتحة','البقرة','آل عمران','النساء','المائدة','الأنعام','الأعراف','الأنفال','التوبة','يونس','هود','يوسف','الرعد','إبراهيم','الحجر','النحل','الإسراء','الكهف','مريم','طه','الأنبياء','الحج','المؤمنون','النور','الفرقان','الشعراء','النمل','القصص','العنكبوت','الروم','لقمان','السجدة','الأحزاب','سبأ','فاطر','يس','الصافات','ص','الزمر','غافر','فصلت','الشورى','الزخرف','الدخان','الجاثية','الأحقاف','محمد','الفتح','الحجرات','ق','الذاريات','الطور','النجم','القمر','الرحمن','الواقعة','الحديد','المجادلة','الحشر','الممتحنة','الصف','الجمعة','المنافقون','التغابن','الطلاق','التحريم','الملك','القلم','الحاقة','المعارج','نوح','الجن','المزمل','المدثر','القيامة','الإنسان','المرسلات','النبأ','النازعات','عبس','التكوير','الإنفطار','المطففين','الإنشقاق','البروج','الطارق','الأعلى','الغاشية','الفجر','البلد','الشمس','الليل','الضحى','الشرح','التين','العلق','القدر','البينة','الزلزلة','العاديات','القارعة','التكاثر','العصر','الهمزة','الفيل','قريش','الماعون','الكوثر','الكافرون','النصر','المسد','الإخلاص','الفلق','الناس'
 ];
 
+const reciterAudioBaseUrl = 'https://server10.mp3quran.net/minsh';
+
 const surahPresets = {
   1: ['بِسْمِ ٱللّٰهِ ٱلرَّحْمٰنِ ٱلرَّحِيمِ', 'ٱلْحَمْدُ لِلّٰهِ رَبِّ ٱلْعٰلَمِينَ', 'ٱلرَّحْمٰنِ ٱلرَّحِيمِ'],
   2: ['ذَٰلِكَ ٱلْكِتَٰبُ لَا رَيْبَ ۛ فِيهِ', 'ٱلَّذِينَ يُؤْمِنُونَ بِٱلْغَيْبِ', 'وَٱلْكٰٰلِمُونَ'],
@@ -317,7 +319,7 @@ async function renderReader() {
   });
 
   document.getElementById('recitationSurah').textContent = current.name;
-  document.getElementById('recitationVerse').textContent = `الآية ${state.currentVerseIndex + 1}`;
+  document.getElementById('recitationVerse').textContent = 'السورة كاملة';
   document.getElementById('recitationText').textContent = verses[state.currentVerseIndex] || verses[0];
 }
 
@@ -463,9 +465,26 @@ function renderPrayerTimes() {
 function renderRecitation() {
   const current = getCurrentSurah();
   const verseText = current.verses[state.currentVerseIndex] || current.verses[0];
+  const audio = document.getElementById('quranAudio');
+  const audioStatus = document.getElementById('audioStatus');
   document.getElementById('recitationSurah').textContent = current.name;
-  document.getElementById('recitationVerse').textContent = `الآية ${state.currentVerseIndex + 1}`;
+  document.getElementById('recitationVerse').textContent = 'السورة كاملة';
   document.getElementById('recitationText').textContent = verseText;
+
+  const audioUrl = `${reciterAudioBaseUrl}/${String(current.id).padStart(3, '0')}.mp3`;
+  if (audio.dataset.source !== audioUrl) {
+    const wasPlaying = !audio.paused;
+    audio.pause();
+    audio.src = audioUrl;
+    audio.dataset.source = audioUrl;
+    audio.load();
+    audioStatus.textContent = 'تلاوة السورة كاملة جاهزة';
+    if (wasPlaying) {
+      audio.play().catch(() => {
+        audioStatus.textContent = 'اضغط تشغيل لبدء التلاوة';
+      });
+    }
+  }
 }
 
 function toggleNightMode() {
@@ -500,22 +519,26 @@ function toggleFavorite() {
   renderHome();
 }
 
-function speakCurrentVerse() {
-  if (!state.soundEnabled || !('speechSynthesis' in window)) return;
-  const text = getSurahVerses(state.currentSurahId)[state.currentVerseIndex] || '';
-  if (!text) return;
+function playCurrentSurah() {
+  const audio = document.getElementById('quranAudio');
+  const audioStatus = document.getElementById('audioStatus');
+  if (!state.soundEnabled) {
+    audioStatus.textContent = 'فعّل خيار تشغيل الصوت من الإعدادات أولًا';
+    return;
+  }
 
-  window.speechSynthesis.cancel();
-  const speak = new SpeechSynthesisUtterance(text);
-  speak.lang = 'ar-SA';
-  speak.rate = 0.95;
-  window.speechSynthesis.speak(speak);
+  audio.currentTime = 0;
+  audio.play().then(() => {
+    audioStatus.textContent = 'جاري تشغيل السورة كاملة';
+  }).catch(() => {
+    audioStatus.textContent = 'تعذر تشغيل التلاوة. تحقق من اتصال الإنترنت';
+  });
 }
 
 function stopSpeech() {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-  }
+  const audio = document.getElementById('quranAudio');
+  audio.pause();
+  document.getElementById('audioStatus').textContent = 'تم إيقاف التلاوة';
 }
 
 function renderAll() {
@@ -567,8 +590,25 @@ function bindEvents() {
   document.getElementById('bookmarkBtn').addEventListener('click', addBookmark);
   document.getElementById('favoriteBtn').addEventListener('click', toggleFavorite);
 
-  document.getElementById('playRecitationBtn').addEventListener('click', speakCurrentVerse);
+  document.getElementById('playRecitationBtn').addEventListener('click', playCurrentSurah);
   document.getElementById('pauseRecitationBtn').addEventListener('click', stopSpeech);
+  document.getElementById('quranAudio').addEventListener('play', () => {
+    document.getElementById('audioStatus').textContent = 'جاري تشغيل السورة كاملة';
+  });
+  document.getElementById('quranAudio').addEventListener('loadedmetadata', () => {
+    document.getElementById('audioStatus').textContent = 'تلاوة السورة كاملة جاهزة';
+  });
+  document.getElementById('quranAudio').addEventListener('pause', () => {
+    if (!document.getElementById('quranAudio').ended) {
+      document.getElementById('audioStatus').textContent = 'التلاوة متوقفة مؤقتًا';
+    }
+  });
+  document.getElementById('quranAudio').addEventListener('ended', () => {
+    document.getElementById('audioStatus').textContent = 'انتهت تلاوة السورة';
+  });
+  document.getElementById('quranAudio').addEventListener('error', () => {
+    document.getElementById('audioStatus').textContent = 'تعذر تحميل التلاوة. تحقق من اتصال الإنترنت';
+  });
 
   document.getElementById('tasbihPlusBtn').addEventListener('click', () => {
     state.tasbih += 1;

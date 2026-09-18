@@ -388,10 +388,22 @@ button {
   flex-wrap: wrap;
   color: var(--muted);
 }
+.reciter-name {
+  color: var(--primary);
+  font-weight: 700;
+}
 .player-controls {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+}
+.quran-audio {
+  width: 100%;
+  accent-color: var(--primary);
+}
+.audio-status {
+  color: var(--muted);
+  min-height: 1.2em;
 }
 .recitation-text {
   margin: 0;
@@ -492,6 +504,63 @@ button {
   }
 }
 @media (max-width: 580px) {
+  .app-shell {
+    gap: 12px;
+    padding: 12px;
+  }
+  .sidebar {
+    padding: 12px;
+    border-radius: 18px;
+  }
+  .brand {
+    padding: 6px 4px 12px;
+  }
+  .brand-mark {
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+  }
+  .brand h2 {
+    font-size: 1rem;
+  }
+  .nav-menu {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .nav-btn {
+    min-height: 46px;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 0.78rem;
+  }
+  .main-panel {
+    width: 100%;
+  }
+  .topbar {
+    padding: 14px;
+  }
+  .topbar h1 {
+    font-size: 1.5rem;
+  }
+  .view {
+    margin-top: 12px;
+  }
+  .panel, .hero-card {
+    padding: 14px;
+    border-radius: 14px;
+  }
+  .reader-actions {
+    flex-wrap: wrap;
+  }
+  .reader-actions button {
+    flex: 1;
+  }
+  .surah-reader {
+    font-size: 1.45rem;
+    line-height: 2;
+  }
   .stats-grid {
     grid-template-columns: 1fr;
   }
